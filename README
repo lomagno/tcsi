@@ -1,0 +1,94 @@
+####################
+Build configurations
+####################
+
+The source folder is plugin/src. Open the project file tcsi.pro, which 
+is in the source folder, with Qt Creator. The Qt project has two build 
+configuration: debug and release. The debug configuration is for 
+testing, while the release configuration is the correct configuration 
+for building the plugin.
+
+
+############
+Dependencies
+############
+
+The following files must be added in the source folder:
+
+- stplugin.c
+
+- stplugin.h
+
+They can be downloaded from http://www.stata.com/plugins/. It is 
+suggested to download and use version 2.0 of these files for ensuring 
+compatibility with older than 14.1 Stata versions.
+
+The building depends on the GLPK library 
+(https://www.gnu.org/software/glpk/). In Linux you can install the 
+required files by typing:
+
+. apt-get install libglpk-dev
+
+If you dinamically link GLPK, then the plugin will require the GLPK 
+shared library. To allow the plugin to find the library, in Linux you 
+can install the library with
+
+. apt-get install libglpk36
+
+
+###################
+Building in Windows
+###################
+
+Before compiling in Windows, the libglpk.a file must be in the same folder of
+the .pro file. If you use GCC, compilation must be done with the -static-libgcc
+and -static-libstdc++ options.
+
+
+###################
+Building without Qt
+###################
+
+Without Qt you can compile with the following commands by using GCC:
+
+
+Linux:
+------
+
+. g++ -c main.cpp -DSYSTEM=OPUNIX
+. g++ -c statapluginutils.cpp -DSYSTEM=OPUNIX
+. g++ -c stplugin.c -DSYSTEM=OPUNIX
+. g++ -shared main.o statapluginutils.o stplugin.o -lglpk -o tcsi_linux.plugin
+
+
+Mac:
+----
+
+. g++ -c main.cpp -bundle -DSYSTEM=APPLEMAC
+. g++ -c statapluginutils.cpp -bundle -DSYSTEM=APPLEMAC
+. g++ -c stplugin.c -bundle -DSYSTEM=APPLEMAC
+. g++ -shared main.o statapluginutils.o stplugin.o -lglpk -o tcsi_mac.plugin
+
+The plugin should be distributed together with the GLPK library. To this 
+end you should instruct the plugin executable about where to find the 
+GLPK library (for example libglpk.36.dylib). The following is an example 
+about how to instruct the plugin to find the GLPK library in the same 
+folder of the plugin:
+
+. install_name_tool -change /usr/local/lib/libglpk.36.dylib 
+@loader_path/libglpk.36.dylib tcsi_mac.plugin
+
+
+Windows:
+--------
+
+. g++ -c main.cpp
+. g++ -c statapluginutils.cpp
+. g++ -c stplugin.c
+. g++ -shared main.o statapluginutils.o stplugin.o -l:libglpk.a 
+-static-libgcc -static-libstdc++ -o tcsi_windows.plugin
+
+The GLPK lib must be statically linked when compiling tcsi in Windows. 
+Furthermore the -static-libgcc and -static-libstdc++ options are 
+required for linking. A recent version of GCC is required for the 
+-static-libgcc and -static-libstdc++ options.
